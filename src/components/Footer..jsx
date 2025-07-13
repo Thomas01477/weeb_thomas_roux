@@ -1,44 +1,44 @@
 const Footer = () => {
   return (
-    <footer className="bg-white py-10">
-      <div className="container mx-auto px-4">
+    <footer className="bg-white pt-15 pb-5">
+      <div className="max-w-[1000px] mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
           <div>
-            <h3 className="text-xl font-bold mb-4">weeb</h3>
+            <h3 className="text-2xl font-bold mb-4">weeb</h3>
           </div>
           <div>
-            <h4 className="font-semibold mb-3">PRODUCT</h4>
-            <ul className="space-y-2 text-gray-400">
+            <h4 className="font-semibold mb-3 text-blue-gray">PRODUCT</h4>
+            <ul className="space-y-2">
               <li>
                 <a href="#" className="hover:text-purple">
-                  Pricing
+                  Prix
                 </a>
               </li>
               <li>
                 <a href="#" className="hover:text-purple">
-                  Overview
+                  Aperçu
                 </a>
               </li>
               <li>
                 <a href="#" className="hover:text-purple">
-                  Browse
+                  Parcourir
                 </a>
               </li>
               <li>
                 <a href="#" className="hover:text-purple">
-                  Accessibility
+                  Accessibilité
                 </a>
               </li>
               <li>
                 <a href="#" className="hover:text-purple">
-                  Five
+                  Cinq
                 </a>
               </li>
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold mb-3">SOLUTIONS</h4>
-            <ul className="space-y-2 text-gray-400">
+            <h4 className="font-semibold mb-3 text-blue-gray">SOLUTIONS</h4>
+            <ul className="space-y-2">
               <li>
                 <a href="#" className="hover:text-purple">
                   Brainstorming
@@ -46,27 +46,27 @@ const Footer = () => {
               </li>
               <li>
                 <a href="#" className="hover:text-purple">
-                  Ideation
+                  Idéation
                 </a>
               </li>
               <li>
                 <a href="#" className="hover:text-purple">
-                  Wireframing
+                  Maquettage
                 </a>
               </li>
               <li>
                 <a href="#" className="hover:text-purple">
-                  Research
+                  Recherche
                 </a>
               </li>
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold mb-3">RESOURCES</h4>
-            <ul className="space-y-2 text-gray-400">
+            <h4 className="font-semibold mb-3 text-blue-gray">RESOURCES</h4>
+            <ul className="space-y-2">
               <li>
                 <a href="#" className="hover:text-purple">
-                  Help Center
+                  Centre d'aide
                 </a>
               </li>
               <li>
@@ -76,17 +76,17 @@ const Footer = () => {
               </li>
               <li>
                 <a href="#" className="hover:text-purple">
-                  Tutorials
+                  Tutoriels
                 </a>
               </li>
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold mb-3">COMPANY</h4>
-            <ul className="space-y-2 text-gray-400">
+            <h4 className="font-semibold mb-3 text-blue-gray">COMPANY</h4>
+            <ul className="space-y-2">
               <li>
                 <a href="#" className="hover:text-purple">
-                  About
+                  A propos
                 </a>
               </li>
               <li>
@@ -96,34 +96,38 @@ const Footer = () => {
               </li>
               <li>
                 <a href="#" className="hover:text-purple">
-                  Events
+                  Événements
                 </a>
               </li>
               <li>
                 <a href="#" className="hover:text-purple">
-                  Careers
+                  Carrières
                 </a>
               </li>
             </ul>
           </div>
         </div>
-        <hr></hr>
-        <p className="text-sm text-gray-400">
-          © 2023 Weeb, Inc. All rights reserved.
-        </p>
-        <div className="flex space-x-4 mt-4">
-          <a href="#" className="text-gray-400 hover:text-purple">
-            <i className="fab fa-facebook-f"></i>
-          </a>
-          <a href="#" className="text-gray-400 hover:text-purple">
-            <i className="fab fa-twitter"></i>
-          </a>
-          <a href="#" className="text-gray-400 hover:text-purple">
-            <i className="fab fa-instagram"></i>
-          </a>
-          <a href="#" className="text-gray-400 hover:text-purple">
-            <i className="fab fa-linkedin-in"></i>
-          </a>
+        <div className="flex items-center justify-between flex-wrap mt-15">
+          <p className="text-sm flex">
+            © 2025 Weeb, Inc. Tous droits réservés.
+          </p>
+          <div className="flex space-x-4">
+          <a href="#" className=" hover:text-purple">
+              <i className="fab fa-youtube"></i>
+            </a>
+            <a href="#" className=" hover:text-purple">
+              <i className="fab fa-facebook-f"></i>
+            </a>
+            <a href="#" className=" hover:text-purple">
+              <i className="fab fa-twitter"></i>
+            </a>
+            <a href="#" className=" hover:text-purple">
+              <i className="fab fa-instagram"></i>
+            </a>
+            <a href="#" className=" hover:text-purple">
+              <i className="fab fa-linkedin-in"></i>
+            </a>
+          </div>
         </div>
       </div>
     </footer>
