@@ -20,7 +20,7 @@ const NavBar = () => {
           </div>
           <div className="hidden md:flex items-center space-x-6 ml-auto">
             <Link to="/login" className="px-4 py-2 rounded-lg hover:text-purple-text">Se connecter</Link>
-            <Link to="/login" className="px-4 py-2 bg-purple rounded-lg hover:bg-purple-form">Inscrivez-vous maintenant</Link>
+            <Link to="/register" className="px-4 py-2 bg-purple rounded-lg hover:bg-purple-form">Inscrivez-vous maintenant</Link>
           </div>
         </div>
         
@@ -46,7 +46,7 @@ const NavBar = () => {
           <Link to="/" className="hover:text-purple-text" onClick={() => setIsOpen(false)}>À propos de nous</Link>
           <Link to="/contact" className="hover:text-purple-text" onClick={() => setIsOpen(false)}>Contact</Link>
           <Link to="/login" className="hover:text-purple-text" onClick={() => setIsOpen(false)}>Se connecter</Link>
-          <Link to="/login" className="bg-purple px-4 py-2 rounded-lg hover:bg-purple-form text-center" onClick={() => setIsOpen(false)}>
+          <Link to="/register" className="bg-purple px-4 py-2 rounded-lg hover:bg-purple-form text-center" onClick={() => setIsOpen(false)}>
             Inscrivez-vous maintenant
           </Link>
         </div>
