@@ -15,7 +15,7 @@ const NavBar = () => {
         {/* Desktop Links */}
         <div className="flex justify-between items-center w-full ml-8">
           <div className="hidden md:flex items-center space-x-6">
-            <Link to="/" className="hover:text-purple-text">À propos de nous</Link>
+            <Link to="/about" className="hover:text-purple-text">À propos de nous</Link>
             <Link to="/contact" className="hover:text-purple-text">Contact</Link>
           </div>
           <div className="hidden md:flex items-center space-x-6 ml-auto">
@@ -43,7 +43,7 @@ const NavBar = () => {
       {/* Mobile Menu */}
       {isOpen && (
         <div className="flex flex-col mt-4 space-y-3 md:hidden">
-          <Link to="/" className="hover:text-purple-text" onClick={() => setIsOpen(false)}>À propos de nous</Link>
+          <Link to="/about" className="hover:text-purple-text" onClick={() => setIsOpen(false)}>À propos de nous</Link>
           <Link to="/contact" className="hover:text-purple-text" onClick={() => setIsOpen(false)}>Contact</Link>
           <Link to="/login" className="hover:text-purple-text" onClick={() => setIsOpen(false)}>Se connecter</Link>
           <Link to="/register" className="bg-purple px-4 py-2 rounded-lg hover:bg-purple-form text-center" onClick={() => setIsOpen(false)}>
