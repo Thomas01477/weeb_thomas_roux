@@ -5,6 +5,7 @@ import NavBar from './components/NavBar';
 import Footer from './components/Footer.';
 import Contact from './pages/Contact';
 import Login from './pages/Login';
+import Register from './pages/Register';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />
