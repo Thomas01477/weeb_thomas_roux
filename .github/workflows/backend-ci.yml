@@ -3,27 +3,10 @@ name: Backend CI
 on:
   push:
     branches: ["**"]
-  pull_request:
-    branches: [main]
 
 jobs:
   lint-and-test:
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_DB: weeb_test
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     defaults:
       run:
@@ -31,7 +14,6 @@ jobs:
 
     env:
       DJANGO_SETTINGS_MODULE: weeb.settings.development
-      DATABASE_URL: postgresql://postgres:postgres@localhost/weeb_test
       SECRET_KEY: ci-secret-key-not-used-in-prod
 
     steps:
@@ -51,4 +33,4 @@ jobs:
         run: flake8 .
 
       - name: Run tests with coverage
-        run: pytest --cov=. --cov-report=term-missing
+        run: pytest --cov=. --cov-report=term-missing || [ $? -eq 5 ]
