@@ -1,6 +1,6 @@
 # weeb_thomas_roux
 
-Application web fullstack composée d'un frontend React, d'un backend Django REST et d'un module Machine Learning standalone.
+Application web fullstack composée d'un frontend React, d'un backend Django REST.
 
 ## Structure du projet
 
