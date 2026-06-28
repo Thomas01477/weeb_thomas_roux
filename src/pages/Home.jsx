@@ -1,44 +1,10 @@
 // eslint-disable-next-line no-unused-vars
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { containerVariants, fadeUp, slideLeft, slideRight } from "../utils/animations";
+import Button from "../components/Button";
 
 function Home() {
-  const containerVariants = {
-    hidden: {},
-    show: {
-      transition: {
-        staggerChildren: 0.2,
-      },
-    },
-  };
-
-  const fadeUp = {
-    hidden: { opacity: 0, y: 30 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6, ease: "easeOut" },
-    },
-  };
-
-  const slideLeft = {
-    hidden: { opacity: 0, x: -80 },
-    visible: {
-      opacity: 1,
-      x: 0,
-      transition: { duration: 0.6, ease: "easeOut" },
-    },
-  };
-
-  const slideRight = {
-    hidden: { opacity: 0, x: 80 },
-    visible: {
-      opacity: 1,
-      x: 0,
-      transition: { duration: 0.6, ease: "easeOut" },
-    },
-  };
-
   const resRef = useRef(null);
   const resInView = useInView(resRef, { once: true, margin: "-100px" });
 
@@ -64,12 +30,8 @@ function Home() {
           Le monde du web évolue constamment, et nous sommes là pour vous guider à travers ses tendances, technologies et meilleures pratiques. Que vous soyez développeur, designer ou passionné du digital, notre blog vous offre du contenu de qualité pour rester à la pointe.
           </p>
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <button className="bg-purple hover:bg-purple-form text-white font-bold py-3 px-8 rounded-lg cursor-pointer">
-              Découvrir les articles
-            </button>
-            <button className="border border-white text-white hover:bg-purple-form font-bold py-3 px-8 rounded-lg cursor-pointer">
-              S'abonner à la newsletter
-            </button>
+            <Button>Découvrir les articles</Button>
+            <Button variant="outline">S'abonner à la newsletter</Button>
           </div>
         </div>
         <div className="mt-16 px-4">
@@ -137,7 +99,7 @@ function Home() {
             className="md:w-1/2 mb-8 md:mb-0"
             variants={slideLeft}
             initial="hidden"
-            animate={resInView ? "visible" : "hidden"}
+            animate={resInView ? "show" : "hidden"}
           >
             <h2 className="text-sm uppercase tracking-wider mb-5">Des ressources pour tous les niveaux</h2>
             <h3 className="text-4xl font-bold mb-6">
@@ -158,7 +120,7 @@ function Home() {
           <motion.div
             variants={slideRight}
             initial="hidden"
-            animate={resInView ? "visible" : "hidden"}
+            animate={resInView ? "show" : "hidden"}
           >
             <img
               src="/assets/home/wireframe-resources.png"
@@ -175,7 +137,7 @@ function Home() {
           <motion.div
             variants={slideLeft}
             initial="hidden"
-            animate={artInView ? "visible" : "hidden"}
+            animate={artInView ? "show" : "hidden"}
           >
             <img
               src="/assets/home/trends.png"
@@ -188,7 +150,7 @@ function Home() {
             className="md:w-1/2"
             variants={slideRight}
             initial="hidden"
-            animate={artInView ? "visible" : "hidden"}
+            animate={artInView ? "show" : "hidden"}
           >
             <h2 className="text-sm uppercase tracking-wider mb-5">
               Le web, un écosystème en constante évolution

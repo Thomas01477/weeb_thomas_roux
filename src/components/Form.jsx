@@ -1,3 +1,5 @@
+import Button from "./Button";
+
 const Form = ({ fields = [], buttonLabel, withBackground = true }) => {
     return (
       <form
@@ -33,12 +35,7 @@ const Form = ({ fields = [], buttonLabel, withBackground = true }) => {
         </div>
   
         <div className="text-center">
-          <button
-            type="submit"
-            className="bg-purple hover:bg-purple-form text-white font-bold py-3 px-8 rounded-lg cursor-pointer"
-          >
-            {buttonLabel || "Envoyer"}
-          </button>
+          <Button type="submit">{buttonLabel || "Envoyer"}</Button>
         </div>
       </form>
     );

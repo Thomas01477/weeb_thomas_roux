@@ -1,15 +1,11 @@
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 40 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } },
-};
+import { containerVariants, fadeUp } from "../utils/animations";
 
 const AboutUs = () => {
   return (
     <div className="max-w-[1000px] mx-auto px-6 text-white min-h-screen flex flex-col py-16">
-        
+
       <div className="overflow-hidden relative w-full border-t border-b border-purple-text p-3 mb-8">
         <motion.div
           animate={{ x: ["100%", "-100%"] }}
@@ -22,10 +18,7 @@ const AboutUs = () => {
       <motion.div
         initial="hidden"
         animate="show"
-        variants={{
-          hidden: {},
-          show: { transition: { staggerChildren: 0.2 } },
-        }}
+        variants={containerVariants}
         className="text-center"
       >
         <motion.h1
