@@ -2,6 +2,7 @@ import pytest
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from accounts.tests.factories import UserFactory
 from contact.models import ContactMessage
 
 
@@ -49,12 +50,27 @@ class TestContactList:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert ContactMessage.objects.count() == 0
 
-    def test_list_messages(self, api_client):
+    def test_list_messages_as_admin(self, api_client):
         ContactMessage.objects.create(
             name='Bob', email='bob@example.com', message='Hello'
         )
+        admin = UserFactory(is_active=True, is_staff=True)
+        api_client.force_authenticate(user=admin)
 
         response = api_client.get('/api/contact/')
 
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) == 1
+
+    def test_list_messages_anonymous(self, api_client):
+        response = api_client.get('/api/contact/')
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_list_messages_as_non_admin_member(self, api_client):
+        member = UserFactory(is_active=True)
+        api_client.force_authenticate(user=member)
+
+        response = api_client.get('/api/contact/')
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
