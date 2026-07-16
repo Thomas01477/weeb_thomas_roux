@@ -9,6 +9,7 @@ import Register from './pages/Register';
 import About from './pages/About';
 import BlogPage from './pages/BlogPage';
 import Account from './pages/Account';
+import AddArticle from './pages/AddArticle';
 import PrivateRoute from './components/PrivateRoute';
 
 function App() {
@@ -27,6 +28,14 @@ function App() {
           element={
             <PrivateRoute>
               <Account />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/add-article"
+          element={
+            <PrivateRoute>
+              <AddArticle />
             </PrivateRoute>
           }
         />
