@@ -4,7 +4,10 @@ import { AuthContext } from "./authContextInstance";
 
 const getStoredUser = () => {
   const accessToken = localStorage.getItem("access_token");
-  return accessToken ? { accessToken } : null;
+  if (!accessToken) return null;
+
+  const storedUser = localStorage.getItem("user");
+  return storedUser ? JSON.parse(storedUser) : {};
 };
 
 export const AuthProvider = ({ children }) => {
@@ -16,15 +19,17 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener(AUTH_LOGOUT_EVENT, handleLogout);
   }, []);
 
-  const login = ({ access, refresh }) => {
+  const login = ({ access, refresh, user: userData = {} }) => {
     localStorage.setItem("access_token", access);
     localStorage.setItem("refresh_token", refresh);
-    setUser({ accessToken: access });
+    localStorage.setItem("user", JSON.stringify(userData));
+    setUser(userData);
   };
 
   const logout = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
+    localStorage.removeItem("user");
     setUser(null);
   };
 
