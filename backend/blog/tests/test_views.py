@@ -70,6 +70,15 @@ class TestArticleDetail:
         article.refresh_from_db()
         assert article.title == 'New title'
 
+    def test_update_article_invalid_data(self, api_client):
+        article = ArticleFactory(title='Old title')
+
+        response = api_client.patch(f'/api/articles/{article.id}/', {'title': ''})
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        article.refresh_from_db()
+        assert article.title == 'Old title'
+
     def test_delete_article(self, api_client):
         article = ArticleFactory()
 
