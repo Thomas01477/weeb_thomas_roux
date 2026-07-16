@@ -2,7 +2,7 @@ import { useState } from "react";
 import Form from "../components/Form";
 import { Link } from "react-router-dom";
 
-const API_URL = "http://localhost:8000/api/auth/register/";
+const API_URL = `${import.meta.env.VITE_API_URL ?? "http://localhost:8000"}/api/auth/register/`;
 
 const INITIAL_VALUES = {
   firstName: "",

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
-const ADMIN_URL = "http://localhost:8000/admin/";
+const ADMIN_URL = `${import.meta.env.VITE_API_URL ?? "http://localhost:8000"}/admin/`;
 
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
