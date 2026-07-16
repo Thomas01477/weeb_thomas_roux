@@ -12,6 +12,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'first_name', 'last_name', 'email', 'password', 'is_active']
         read_only_fields = ['id', 'is_active']
+        extra_kwargs = {
+            'first_name': {'required': True, 'allow_blank': False},
+            'last_name': {'required': True, 'allow_blank': False},
+        }
 
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
