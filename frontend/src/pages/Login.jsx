@@ -1,13 +1,16 @@
 import { useState } from "react";
 import Form from "../components/Form";
 import { Link, useNavigate } from "react-router-dom";
+import apiClient from "../api/axios";
+import { useAuth } from "../hooks/useAuth";
 
-const API_URL = "http://localhost:8000/api/auth/login/";
+const LOGIN_URL = "/api/auth/login/";
 
 const INITIAL_VALUES = { email: "", password: "" };
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [values, setValues] = useState(INITIAL_VALUES);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,29 +37,18 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem("access_token", data.access);
-        localStorage.setItem("refresh_token", data.refresh);
-        navigate("/blog");
-        return;
-      }
-
-      if (response.status === 403) {
+      const response = await apiClient.post(LOGIN_URL, values);
+      login(response.data);
+      navigate("/blog");
+    } catch (submitError) {
+      const responseStatus = submitError.response?.status;
+      if (responseStatus === 403) {
         setError("Votre compte n'a pas encore été validé par un administrateur.");
-      } else if (response.status === 401) {
+      } else if (responseStatus === 401) {
         setError("Adresse e-mail ou mot de passe incorrect.");
       } else {
         setError("Une erreur est survenue. Veuillez réessayer.");
       }
-    } catch {
-      setError("Une erreur est survenue. Veuillez réessayer.");
     } finally {
       setIsSubmitting(false);
     }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import apiClient from "../api/axios";
 
-const API_URL = "http://localhost:8000/api/articles/";
+const ARTICLES_URL = "/api/articles/";
 const EXCERPT_LENGTH = 100;
 
 const formatDate = (dateString) => {
@@ -24,12 +25,8 @@ const BlogPage = () => {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const response = await fetch(API_URL);
-        if (!response.ok) {
-          throw new Error("Erreur lors du chargement des articles");
-        }
-        const data = await response.json();
-        setArticles(data);
+        const response = await apiClient.get(ARTICLES_URL);
+        setArticles(response.data);
       } catch {
         setError("Impossible de charger les articles pour le moment.");
       } finally {

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import Form from "../components/Form";
+import apiClient from "../api/axios";
 
-const API_URL = "http://localhost:8000/api/contact/";
+const CONTACT_URL = "/api/contact/";
 
 const INITIAL_VALUES = {
   lastName: "",
@@ -38,38 +39,24 @@ const Contact = () => {
     setErrors({});
 
     try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: `${values.firstName} ${values.lastName}`.trim(),
-          email: values.email,
-          message: values.message,
-        }),
+      await apiClient.post(CONTACT_URL, {
+        name: `${values.firstName} ${values.lastName}`.trim(),
+        email: values.email,
+        message: values.message,
       });
-
-      if (response.status === 201) {
-        setValues(INITIAL_VALUES);
-        setStatus("success");
-        return;
-      }
-
-      if (response.status === 400) {
-        const data = await response.json();
+      setValues(INITIAL_VALUES);
+      setStatus("success");
+    } catch (submitError) {
+      if (submitError.response?.status === 400) {
         const fieldErrors = {};
-        Object.entries(data).forEach(([field, messages]) => {
+        Object.entries(submitError.response.data).forEach(([field, messages]) => {
           const formField = BACKEND_FIELD_TO_FORM_FIELD[field] || field;
           fieldErrors[formField] = Array.isArray(messages)
             ? messages.join(" ")
             : messages;
         });
         setErrors(fieldErrors);
-        setStatus("error");
-        return;
       }
-
-      setStatus("error");
-    } catch {
       setStatus("error");
     }
   };
