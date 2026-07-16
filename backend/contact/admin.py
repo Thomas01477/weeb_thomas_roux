@@ -2,4 +2,9 @@ from django.contrib import admin
 
 from .models import ContactMessage
 
-admin.site.register(ContactMessage)
+
+@admin.register(ContactMessage)
+class ContactMessageAdmin(admin.ModelAdmin):
+    list_display = ('name', 'email', 'satisfaction', 'created_at')
+    list_filter = ('satisfaction',)
+    search_fields = ('name', 'email', 'message')
