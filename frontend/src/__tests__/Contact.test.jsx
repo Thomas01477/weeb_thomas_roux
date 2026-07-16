@@ -1,6 +1,11 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Contact from "../pages/Contact";
+import apiClient from "../api/axios";
+
+vi.mock("../api/axios", () => ({
+  default: { post: vi.fn() },
+}));
 
 const fillValidForm = async (user) => {
   await user.type(screen.getByLabelText("Nom"), "Doe");
@@ -11,20 +16,13 @@ const fillValidForm = async (user) => {
 };
 
 describe("Contact", () => {
-  beforeEach(() => {
-    globalThis.fetch = vi.fn();
-  });
-
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
   it("affiche un message de succès après une soumission valide", async () => {
     const user = userEvent.setup();
-    globalThis.fetch.mockResolvedValue({
-      status: 201,
-      json: async () => ({ id: 1 }),
-    });
+    apiClient.post.mockResolvedValue({ data: { id: 1 } });
 
     render(<Contact />);
     await fillValidForm(user);
@@ -35,17 +33,16 @@ describe("Contact", () => {
         "Votre message a bien été envoyé"
       );
     });
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      "http://localhost:8000/api/contact/",
-      expect.objectContaining({ method: "POST" })
+    expect(apiClient.post).toHaveBeenCalledWith(
+      "/api/contact/",
+      expect.objectContaining({ email: "john.doe@example.com" })
     );
   });
 
   it("affiche un message d'erreur si l'email est manquant", async () => {
     const user = userEvent.setup();
-    globalThis.fetch.mockResolvedValue({
-      status: 400,
-      json: async () => ({ email: ["This field is required."] }),
+    apiClient.post.mockRejectedValue({
+      response: { status: 400, data: { email: ["This field is required."] } },
     });
 
     render(<Contact />);

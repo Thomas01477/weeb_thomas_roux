@@ -2,22 +2,30 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import Login from "../pages/Login";
+import { AuthProvider } from "../context/AuthContext";
+import apiClient from "../api/axios";
+
+vi.mock("../api/axios", () => ({
+  default: { post: vi.fn() },
+  AUTH_LOGOUT_EVENT: "auth:logout",
+}));
 
 const BlogStub = () => <div>Page Blog</div>;
 
 const renderLogin = () =>
   render(
-    <MemoryRouter initialEntries={["/login"]}>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/blog" element={<BlogStub />} />
-      </Routes>
-    </MemoryRouter>
+    <AuthProvider>
+      <MemoryRouter initialEntries={["/login"]}>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/blog" element={<BlogStub />} />
+        </Routes>
+      </MemoryRouter>
+    </AuthProvider>
   );
 
 describe("Login", () => {
   beforeEach(() => {
-    globalThis.fetch = vi.fn();
     localStorage.clear();
   });
 
@@ -27,10 +35,8 @@ describe("Login", () => {
 
   it("redirige vers /blog après une connexion réussie", async () => {
     const user = userEvent.setup();
-    globalThis.fetch.mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: async () => ({ access: "access-token", refresh: "refresh-token" }),
+    apiClient.post.mockResolvedValue({
+      data: { access: "access-token", refresh: "refresh-token" },
     });
 
     renderLogin();
@@ -47,10 +53,8 @@ describe("Login", () => {
 
   it("affiche une erreur en cas de mauvais mot de passe", async () => {
     const user = userEvent.setup();
-    globalThis.fetch.mockResolvedValue({
-      ok: false,
-      status: 401,
-      json: async () => ({ detail: "Invalid credentials." }),
+    apiClient.post.mockRejectedValue({
+      response: { status: 401, data: { detail: "Invalid credentials." } },
     });
 
     renderLogin();

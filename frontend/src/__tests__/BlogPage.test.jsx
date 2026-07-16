@@ -1,17 +1,18 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import BlogPage from "../pages/BlogPage";
+import apiClient from "../api/axios";
+
+vi.mock("../api/axios", () => ({
+  default: { get: vi.fn() },
+}));
 
 describe("BlogPage", () => {
-  beforeEach(() => {
-    globalThis.fetch = vi.fn();
-  });
-
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
   it("affiche un loader pendant le chargement", () => {
-    globalThis.fetch.mockReturnValue(new Promise(() => {}));
+    apiClient.get.mockReturnValue(new Promise(() => {}));
 
     render(<BlogPage />);
 
@@ -30,10 +31,7 @@ describe("BlogPage", () => {
         content: "Contenu du premier article.",
       },
     ];
-    globalThis.fetch.mockResolvedValue({
-      ok: true,
-      json: async () => articles,
-    });
+    apiClient.get.mockResolvedValue({ data: articles });
 
     render(<BlogPage />);
 
@@ -47,7 +45,7 @@ describe("BlogPage", () => {
   });
 
   it("affiche un message d'erreur si le fetch échoue", async () => {
-    globalThis.fetch.mockResolvedValue({ ok: false });
+    apiClient.get.mockRejectedValue(new Error("network error"));
 
     render(<BlogPage />);
 
