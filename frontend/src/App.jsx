@@ -8,6 +8,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import About from './pages/About';
 import BlogPage from './pages/BlogPage';
+import Account from './pages/Account';
+import PrivateRoute from './components/PrivateRoute';
 
 function App() {
   return (
@@ -20,6 +22,14 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/about" element={<About />} />
         <Route path="/blog" element={<BlogPage />} />
+        <Route
+          path="/account"
+          element={
+            <PrivateRoute>
+              <Account />
+            </PrivateRoute>
+          }
+        />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />

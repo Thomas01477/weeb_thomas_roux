@@ -16,6 +16,7 @@ export const attachAuthHeader = (config) => {
 const clearSession = () => {
   localStorage.removeItem("access_token");
   localStorage.removeItem("refresh_token");
+  localStorage.removeItem("user");
   window.dispatchEvent(new Event(AUTH_LOGOUT_EVENT));
 };
 

@@ -1,8 +1,19 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+
+const ADMIN_URL = "http://localhost:8000/admin/";
 
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { isAuthenticated, user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    setIsOpen(false);
+    navigate("/");
+  };
 
   return (
     <nav className="bg-[#FFFFFF0D] text-white p-6 max-w-[1000px] mx-auto md:mt-6 rounded-2xl">
@@ -18,13 +29,27 @@ const NavBar = () => {
             <Link to="/about" className="hover:text-purple-text">À propos de nous</Link>
             <Link to="/blog" className="hover:text-purple-text">Blog</Link>
             <Link to="/contact" className="hover:text-purple-text">Contact</Link>
+            {isAuthenticated && user?.is_staff && (
+              <a href={ADMIN_URL} className="hover:text-purple-text">Admin</a>
+            )}
           </div>
           <div className="hidden md:flex items-center space-x-6 ml-auto">
-            <Link to="/login" className="px-4 py-2 rounded-lg hover:text-purple-text">Se connecter</Link>
-            <Link to="/register" className="px-4 py-2 bg-purple rounded-lg hover:bg-purple-form">Inscrivez-vous maintenant</Link>
+            {isAuthenticated ? (
+              <>
+                <Link to="/account" className="px-4 py-2 rounded-lg hover:text-purple-text">Mon compte</Link>
+                <button onClick={handleLogout} className="px-4 py-2 bg-purple rounded-lg hover:bg-purple-form cursor-pointer">
+                  Déconnexion
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="px-4 py-2 rounded-lg hover:text-purple-text">Connexion</Link>
+                <Link to="/register" className="px-4 py-2 bg-purple rounded-lg hover:bg-purple-form">S'inscrire</Link>
+              </>
+            )}
           </div>
         </div>
-        
+
         {/* Burger Menu Button */}
         <button className="md:hidden" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle Menu">
           {isOpen ? (
@@ -47,10 +72,27 @@ const NavBar = () => {
           <Link to="/about" className="hover:text-purple-text" onClick={() => setIsOpen(false)}>À propos de nous</Link>
           <Link to="/blog" className="hover:text-purple-text" onClick={() => setIsOpen(false)}>Blog</Link>
           <Link to="/contact" className="hover:text-purple-text" onClick={() => setIsOpen(false)}>Contact</Link>
-          <Link to="/login" className="hover:text-purple-text" onClick={() => setIsOpen(false)}>Se connecter</Link>
-          <Link to="/register" className="bg-purple px-4 py-2 rounded-lg hover:bg-purple-form text-center" onClick={() => setIsOpen(false)}>
-            Inscrivez-vous maintenant
-          </Link>
+          {isAuthenticated && user?.is_staff && (
+            <a href={ADMIN_URL} className="hover:text-purple-text" onClick={() => setIsOpen(false)}>Admin</a>
+          )}
+          {isAuthenticated ? (
+            <>
+              <Link to="/account" className="hover:text-purple-text" onClick={() => setIsOpen(false)}>Mon compte</Link>
+              <button
+                onClick={handleLogout}
+                className="bg-purple px-4 py-2 rounded-lg hover:bg-purple-form text-center cursor-pointer"
+              >
+                Déconnexion
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="hover:text-purple-text" onClick={() => setIsOpen(false)}>Connexion</Link>
+              <Link to="/register" className="bg-purple px-4 py-2 rounded-lg hover:bg-purple-form text-center" onClick={() => setIsOpen(false)}>
+                S'inscrire
+              </Link>
+            </>
+          )}
         </div>
       )}
     </nav>
