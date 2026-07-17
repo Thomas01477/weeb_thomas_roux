@@ -1,0 +1,7 @@
+.venv/
+.env
+model.pkl
+data/sentiment.zip
+data/sentiment_data.csv
+__pycache__/
+*.pyc
