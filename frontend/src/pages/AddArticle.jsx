@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import * as Sentry from "@sentry/react";
 import Form from "../components/Form";
 import apiClient from "../api/axios";
 import { useAuth } from "../hooks/useAuth";
@@ -48,6 +49,7 @@ const AddArticle = () => {
       } else if (responseStatus === 403) {
         setGeneralError("Vous n'avez pas les droits pour publier un article.");
       } else {
+        Sentry.captureException(submitError);
         setGeneralError("Une erreur est survenue. Veuillez réessayer.");
       }
     } finally {

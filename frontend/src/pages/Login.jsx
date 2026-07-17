@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Form from "../components/Form";
 import { Link, useNavigate } from "react-router-dom";
+import * as Sentry from "@sentry/react";
 import apiClient from "../api/axios";
 import { useAuth } from "../hooks/useAuth";
 
@@ -47,6 +48,7 @@ const Login = () => {
       } else if (responseStatus === 401) {
         setError("Adresse e-mail ou mot de passe incorrect.");
       } else {
+        Sentry.captureException(submitError);
         setError("Une erreur est survenue. Veuillez réessayer.");
       }
     } finally {

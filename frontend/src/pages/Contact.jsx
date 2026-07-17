@@ -1,4 +1,5 @@
 import { useState } from "react";
+import * as Sentry from "@sentry/react";
 import Form from "../components/Form";
 import apiClient from "../api/axios";
 
@@ -56,6 +57,8 @@ const Contact = () => {
             : messages;
         });
         setErrors(fieldErrors);
+      } else {
+        Sentry.captureException(submitError);
       }
       setStatus("error");
     }

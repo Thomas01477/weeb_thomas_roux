@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Form from "../components/Form";
 import { Link } from "react-router-dom";
+import * as Sentry from "@sentry/react";
 
 const API_URL = `${import.meta.env.VITE_API_URL ?? "http://localhost:8000"}/api/auth/register/`;
 
@@ -96,9 +97,11 @@ const Register = () => {
         });
         setErrors(fieldErrors);
       } else {
+        Sentry.captureException(new Error(`Unexpected register response status: ${response.status}`));
         setErrors({ email: "Une erreur est survenue. Veuillez réessayer." });
       }
-    } catch {
+    } catch (submitError) {
+      Sentry.captureException(submitError);
       setErrors({ email: "Une erreur est survenue. Veuillez réessayer." });
     } finally {
       setIsSubmitting(false);
