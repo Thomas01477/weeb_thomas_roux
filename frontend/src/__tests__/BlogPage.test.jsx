@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import BlogPage from "../pages/BlogPage";
 import apiClient from "../api/axios";
@@ -148,5 +148,70 @@ describe("BlogPage", () => {
     });
     await waitFor(() => expect(screen.getByText("Article page 2")).toBeInTheDocument());
     expect(screen.getByRole("button", { name: /suivant/i })).toBeDisabled();
+  });
+
+  it("affiche le badge de catégorie sur un article qui en a une", async () => {
+    apiClient.get.mockImplementation((url) => {
+      if (url === "/api/categories/") {
+        return Promise.resolve({ data: [{ id: 1, name: "Tech" }] });
+      }
+      return Promise.resolve(
+        paginatedResponse([
+          {
+            id: 1,
+            title: "Article catégorisé",
+            author: "Alice",
+            created_at: "2026-01-15T10:00:00Z",
+            content: "Contenu.",
+            category: 1,
+            category_name: "Tech",
+          },
+        ])
+      );
+    });
+
+    render(<BlogPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Article catégorisé")).toBeInTheDocument();
+    });
+    const article = screen.getByText("Article catégorisé").closest("article");
+    expect(within(article).getByText("Tech")).toBeInTheDocument();
+  });
+
+  it("filtre les articles par catégorie sélectionnée", async () => {
+    const user = userEvent.setup();
+    apiClient.get.mockImplementation((url) => {
+      if (url === "/api/categories/") {
+        return Promise.resolve({
+          data: [
+            { id: 1, name: "Tech" },
+            { id: 2, name: "Culture" },
+          ],
+        });
+      }
+      return Promise.resolve(
+        paginatedResponse([
+          {
+            id: 1,
+            title: "Article Tech",
+            author: "Alice",
+            created_at: "2026-01-15T10:00:00Z",
+            content: "Contenu.",
+          },
+        ])
+      );
+    });
+
+    render(<BlogPage />);
+    await waitFor(() => expect(screen.getByText("Article Tech")).toBeInTheDocument());
+
+    await user.selectOptions(screen.getByLabelText("Filtrer par catégorie"), "1");
+
+    await waitFor(() => {
+      expect(apiClient.get).toHaveBeenLastCalledWith("/api/articles/", {
+        params: { search: undefined, category: "1", page: 1 },
+      });
+    });
   });
 });

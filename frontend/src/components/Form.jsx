@@ -55,6 +55,29 @@ const Form = ({
                       }
                     : {})}
                 ></textarea>
+              ) : field.type === "select" ? (
+                <select
+                  id={field.name}
+                  name={field.name}
+                  className="w-full px-3 py-2 bg-transparent border-b border-purple-text text-purple-text text-center focus:outline-none focus:border-purple-form"
+                  {...(isControlled
+                    ? {
+                        value: values?.[field.name] ?? "",
+                        onChange: (event) =>
+                          onChange(field.name, event.target.value),
+                      }
+                    : {})}
+                >
+                  {(field.options || []).map((option) => (
+                    <option
+                      key={option.value}
+                      value={option.value}
+                      className="bg-black"
+                    >
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               ) : (
                 <input
                   id={field.name}

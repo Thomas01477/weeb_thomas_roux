@@ -7,8 +7,8 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .models import Article
-from .serializers import ArticleSerializer
+from .models import Article, Category
+from .serializers import ArticleSerializer, CategorySerializer
 
 
 class ArticlePagination(PageNumberPagination):
@@ -20,6 +20,13 @@ def _require_active_member(request):
         raise NotAuthenticated()
     if not request.user.is_active:
         raise PermissionDenied('Only active members can perform this action.')
+
+
+@api_view(['GET'])
+def category_list(request):
+    categories = Category.objects.all()
+    serializer = CategorySerializer(categories, many=True)
+    return Response(serializer.data)
 
 
 @api_view(['GET'])
@@ -42,6 +49,10 @@ def article_list(request):
         search = request.query_params.get('search')
         if search:
             articles = articles.filter(Q(title__icontains=search) | Q(content__icontains=search))
+
+        category = request.query_params.get('category')
+        if category and category.isdigit():
+            articles = articles.filter(category_id=category)
 
         paginator = ArticlePagination()
         page = paginator.paginate_queryset(articles, request)
