@@ -1,7 +1,8 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import NotAuthenticated, PermissionDenied
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Article
@@ -13,6 +14,14 @@ def _require_active_member(request):
         raise NotAuthenticated()
     if not request.user.is_active:
         raise PermissionDenied('Only active members can perform this action.')
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def my_articles(request):
+    articles = Article.objects.filter(owner=request.user).order_by('-created_at')
+    serializer = ArticleSerializer(articles, many=True)
+    return Response(serializer.data)
 
 
 @api_view(['GET', 'POST'])
