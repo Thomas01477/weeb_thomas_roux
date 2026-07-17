@@ -21,6 +21,7 @@ const BACKEND_FIELD_TO_FORM_FIELD = {
 const Register = () => {
   const [values, setValues] = useState(INITIAL_VALUES);
   const [errors, setErrors] = useState({});
+  const [generalError, setGeneralError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -59,6 +60,7 @@ const Register = () => {
 
   const handleSubmit = async () => {
     setErrors({});
+    setGeneralError("");
     setIsSuccess(false);
 
     if (values.password !== values.confirmPassword) {
@@ -88,14 +90,18 @@ const Register = () => {
 
       if (response.status === 400) {
         const data = await response.json();
-        const fieldErrors = {};
-        Object.entries(data).forEach(([field, messages]) => {
-          const formField = BACKEND_FIELD_TO_FORM_FIELD[field] || field;
-          fieldErrors[formField] = Array.isArray(messages)
-            ? messages.join(" ")
-            : messages;
-        });
-        setErrors(fieldErrors);
+        if (data.detail) {
+          setGeneralError(data.detail);
+        } else {
+          const fieldErrors = {};
+          Object.entries(data).forEach(([field, messages]) => {
+            const formField = BACKEND_FIELD_TO_FORM_FIELD[field] || field;
+            fieldErrors[formField] = Array.isArray(messages)
+              ? messages.join(" ")
+              : messages;
+          });
+          setErrors(fieldErrors);
+        }
       } else {
         Sentry.captureException(new Error(`Unexpected register response status: ${response.status}`));
         setErrors({ email: "Une erreur est survenue. Veuillez réessayer." });
@@ -115,6 +121,12 @@ const Register = () => {
       {isSuccess && (
         <p role="status" className="mb-6 text-green-400">
           Compte créé, en attente de validation par un administrateur.
+        </p>
+      )}
+
+      {generalError && (
+        <p role="alert" className="mb-6 text-red-400">
+          {generalError}
         </p>
       )}
 

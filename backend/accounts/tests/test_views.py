@@ -43,6 +43,37 @@ class TestRegister:
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
+    def test_register_with_existing_email_does_not_reveal_it(self, api_client):
+        UserFactory(email='alice@example.com')
+
+        payload = {
+            'first_name': 'Alice',
+            'last_name': 'Doe',
+            'email': 'alice@example.com',
+            'password': 'strongpass123',
+        }
+
+        response = api_client.post('/api/auth/register/', payload)
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        body = str(response.data).lower()
+        assert 'exist' not in body
+        assert 'déjà' not in body
+        assert User.objects.filter(email='alice@example.com').count() == 1
+
+    def test_register_with_malformed_email(self, api_client):
+        payload = {
+            'first_name': 'Bob',
+            'last_name': 'Doe',
+            'email': 'not-an-email',
+            'password': 'strongpass123',
+        }
+
+        response = api_client.post('/api/auth/register/', payload)
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'email' in response.data
+
     def test_register_with_missing_name_fields(self, api_client):
         payload = {
             'email': 'bob@example.com',

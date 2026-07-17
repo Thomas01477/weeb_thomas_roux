@@ -17,11 +17,6 @@ class RegisterSerializer(serializers.ModelSerializer):
             'last_name': {'required': True, 'allow_blank': False},
         }
 
-    def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError('A user with this email already exists.')
-        return value
-
     def create(self, validated_data):
         password = validated_data.pop('password')
         user = User(username=validated_data['email'], **validated_data)
