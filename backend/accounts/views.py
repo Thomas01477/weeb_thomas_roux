@@ -1,11 +1,11 @@
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import LoginSerializer, RegisterSerializer
+from .serializers import LoginSerializer, ProfileSerializer, RegisterSerializer
 
 User = get_user_model()
 
@@ -51,3 +51,16 @@ def login(request):
             'is_staff': user.is_staff,
         },
     })
+
+
+@api_view(['GET', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def profile(request):
+    if request.method == 'GET':
+        return Response(ProfileSerializer(request.user).data)
+
+    serializer = ProfileSerializer(request.user, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

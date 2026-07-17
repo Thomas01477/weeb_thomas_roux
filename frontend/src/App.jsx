@@ -32,6 +32,14 @@ function App() {
           }
         />
         <Route
+          path="/profile"
+          element={
+            <PrivateRoute>
+              <Account />
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/add-article"
           element={
             <PrivateRoute>

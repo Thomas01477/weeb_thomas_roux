@@ -86,3 +86,52 @@ class TestLogin:
         assert response.status_code == status.HTTP_200_OK
         assert 'access' in response.data
         assert 'refresh' in response.data
+
+
+@pytest.mark.django_db
+class TestProfile:
+    def test_get_profile_without_auth(self, api_client):
+        response = api_client.get('/api/auth/profile/')
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_get_profile_with_auth(self, api_client):
+        user = UserFactory(email='erin@example.com', first_name='Erin')
+        api_client.force_authenticate(user=user)
+
+        response = api_client.get('/api/auth/profile/')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['email'] == 'erin@example.com'
+        assert response.data['first_name'] == 'Erin'
+
+    def test_patch_profile_updates_fields(self, api_client):
+        user = UserFactory(email='frank@example.com', first_name='Frank')
+        api_client.force_authenticate(user=user)
+
+        response = api_client.patch(
+            '/api/auth/profile/',
+            {'first_name': 'Franklin', 'last_name': 'Doe', 'email': 'franklin@example.com'},
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        user.refresh_from_db()
+        assert user.first_name == 'Franklin'
+        assert user.last_name == 'Doe'
+        assert user.email == 'franklin@example.com'
+
+    def test_patch_profile_with_existing_email(self, api_client):
+        UserFactory(email='taken@example.com')
+        user = UserFactory(email='grace@example.com')
+        api_client.force_authenticate(user=user)
+
+        response = api_client.patch('/api/auth/profile/', {'email': 'taken@example.com'})
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        user.refresh_from_db()
+        assert user.email == 'grace@example.com'
+
+    def test_patch_profile_without_auth(self, api_client):
+        response = api_client.patch('/api/auth/profile/', {'first_name': 'Nope'})
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
