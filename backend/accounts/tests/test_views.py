@@ -77,7 +77,7 @@ class TestLogin:
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_login_with_active_account(self, api_client):
-        UserFactory(email='dave@example.com', is_active=True)
+        user = UserFactory(email='dave@example.com', is_active=True)
 
         response = api_client.post(
             '/api/auth/login/', {'email': 'dave@example.com', 'password': 'pass1234'}
@@ -86,6 +86,7 @@ class TestLogin:
         assert response.status_code == status.HTTP_200_OK
         assert 'access' in response.data
         assert 'refresh' in response.data
+        assert response.data['user']['id'] == user.id
 
 
 @pytest.mark.django_db

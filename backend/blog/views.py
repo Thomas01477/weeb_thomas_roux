@@ -43,7 +43,10 @@ def article_list(request):
         articles = Article.objects.all().order_by('-created_at')
 
         author = request.query_params.get('author')
-        if author:
+        if author == 'me':
+            if request.user.is_authenticated:
+                articles = articles.filter(owner=request.user)
+        elif author:
             articles = articles.filter(author__icontains=author)
 
         search = request.query_params.get('search')

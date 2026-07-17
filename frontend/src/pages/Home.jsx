@@ -1,10 +1,12 @@
 // eslint-disable-next-line no-unused-vars
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { containerVariants, fadeUp, slideLeft, slideRight } from "../utils/animations";
 import Button from "../components/Button";
 
 function Home() {
+  const navigate = useNavigate();
   const resRef = useRef(null);
   const resInView = useInView(resRef, { once: true, margin: "-100px" });
 
@@ -30,7 +32,7 @@ function Home() {
           Le monde du web évolue constamment, et nous sommes là pour vous guider à travers ses tendances, technologies et meilleures pratiques. Que vous soyez développeur, designer ou passionné du digital, notre blog vous offre du contenu de qualité pour rester à la pointe.
           </p>
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <Button>Découvrir les articles</Button>
+            <Button onClick={() => navigate("/blog")}>Découvrir les articles</Button>
             <Button variant="outline">S'abonner à la newsletter</Button>
           </div>
         </div>

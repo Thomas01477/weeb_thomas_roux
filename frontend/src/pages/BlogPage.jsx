@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import * as Sentry from "@sentry/react";
 import apiClient from "../api/axios";
+import { useAuth } from "../hooks/useAuth";
 
 const ARTICLES_URL = "/api/articles/";
 const CATEGORIES_URL = "/api/categories/";
@@ -21,12 +22,14 @@ const getExcerpt = (content) => {
 };
 
 const BlogPage = () => {
+  const { user } = useAuth();
   const [articles, setArticles] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [categories, setCategories] = useState([]);
+  const [showMine, setShowMine] = useState(false);
   const [page, setPage] = useState(1);
   const [count, setCount] = useState(0);
   const [hasNext, setHasNext] = useState(false);
@@ -46,7 +49,12 @@ const BlogPage = () => {
 
     apiClient
       .get(ARTICLES_URL, {
-        params: { search: search || undefined, category: category || undefined, page },
+        params: {
+          search: search || undefined,
+          category: category || undefined,
+          author: showMine ? "me" : undefined,
+          page,
+        },
       })
       .then((response) => {
         if (!isMounted) return;
@@ -67,7 +75,7 @@ const BlogPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [search, category, page]);
+  }, [search, category, showMine, page]);
 
   const handleSearchChange = (event) => {
     setSearch(event.target.value);
@@ -76,6 +84,11 @@ const BlogPage = () => {
 
   const handleCategoryChange = (event) => {
     setCategory(event.target.value);
+    setPage(1);
+  };
+
+  const toggleShowMine = () => {
+    setShowMine((previous) => !previous);
     setPage(1);
   };
 
@@ -124,6 +137,18 @@ const BlogPage = () => {
             </select>
           </div>
         )}
+
+        {user && (
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={toggleShowMine}
+              className="px-4 py-2 rounded-lg border border-purple-text hover:text-purple-text cursor-pointer"
+            >
+              {showMine ? "Tous les articles" : "Mes articles uniquement"}
+            </button>
+          </div>
+        )}
       </div>
 
       {isLoading && (
@@ -142,7 +167,9 @@ const BlogPage = () => {
         <p className="text-center text-gray-300">
           {search
             ? "Aucun article ne correspond à votre recherche."
-            : "Aucun article pour le moment."}
+            : showMine
+              ? "Vous n'avez pas encore publié d'article."
+              : "Aucun article pour le moment."}
         </p>
       )}
 

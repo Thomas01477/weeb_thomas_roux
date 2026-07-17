@@ -2,10 +2,12 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import BlogPage from "../pages/BlogPage";
+import { AuthProvider } from "../context/AuthContext";
 import apiClient from "../api/axios";
 
 vi.mock("../api/axios", () => ({
   default: { get: vi.fn() },
+  AUTH_LOGOUT_EVENT: "auth:logout",
 }));
 
 const paginatedResponse = (results, overrides = {}) => ({
@@ -14,14 +16,17 @@ const paginatedResponse = (results, overrides = {}) => ({
 
 const renderBlogPage = () =>
   render(
-    <MemoryRouter>
-      <BlogPage />
-    </MemoryRouter>
+    <AuthProvider>
+      <MemoryRouter>
+        <BlogPage />
+      </MemoryRouter>
+    </AuthProvider>
   );
 
 describe("BlogPage", () => {
   afterEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
   });
 
   it("affiche un loader pendant le chargement", () => {
@@ -102,7 +107,7 @@ describe("BlogPage", () => {
 
     await waitFor(() => {
       expect(apiClient.get).toHaveBeenLastCalledWith("/api/articles/", {
-        params: { search: "Weeb", page: 1 },
+        params: { search: "Weeb", category: undefined, author: undefined, page: 1 },
       });
     });
     await waitFor(() => {
@@ -151,7 +156,7 @@ describe("BlogPage", () => {
 
     await waitFor(() => {
       expect(apiClient.get).toHaveBeenLastCalledWith("/api/articles/", {
-        params: { search: undefined, page: 2 },
+        params: { search: undefined, category: undefined, author: undefined, page: 2 },
       });
     });
     await waitFor(() => expect(screen.getByText("Article page 2")).toBeInTheDocument());
@@ -218,8 +223,54 @@ describe("BlogPage", () => {
 
     await waitFor(() => {
       expect(apiClient.get).toHaveBeenLastCalledWith("/api/articles/", {
-        params: { search: undefined, category: "1", page: 1 },
+        params: { search: undefined, category: "1", author: undefined, page: 1 },
       });
     });
+  });
+
+  it("n'affiche pas le bouton 'Mes articles uniquement' si non authentifié", async () => {
+    apiClient.get.mockResolvedValue(paginatedResponse([]));
+
+    renderBlogPage();
+    await waitFor(() =>
+      expect(screen.getByText("Aucun article pour le moment.")).toBeInTheDocument()
+    );
+
+    expect(
+      screen.queryByRole("button", { name: /mes articles uniquement/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it("filtre sur les articles de l'utilisateur connecté via le bouton dédié", async () => {
+    localStorage.setItem("access_token", "valid-token");
+    localStorage.setItem(
+      "user",
+      JSON.stringify({ id: 1, email: "john@example.com" })
+    );
+
+    const user = userEvent.setup();
+    apiClient.get.mockResolvedValue(
+      paginatedResponse([
+        {
+          id: 1,
+          title: "Article de John",
+          author: "John",
+          created_at: "2026-01-15T10:00:00Z",
+          content: "Contenu.",
+        },
+      ])
+    );
+
+    renderBlogPage();
+    await waitFor(() => expect(screen.getByText("Article de John")).toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: /mes articles uniquement/i }));
+
+    await waitFor(() => {
+      expect(apiClient.get).toHaveBeenLastCalledWith("/api/articles/", {
+        params: { search: undefined, category: undefined, author: "me", page: 1 },
+      });
+    });
+    expect(screen.getByRole("button", { name: /tous les articles/i })).toBeInTheDocument();
   });
 });
