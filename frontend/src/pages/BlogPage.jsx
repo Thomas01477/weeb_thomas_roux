@@ -3,6 +3,7 @@ import * as Sentry from "@sentry/react";
 import apiClient from "../api/axios";
 
 const ARTICLES_URL = "/api/articles/";
+const CATEGORIES_URL = "/api/categories/";
 const EXCERPT_LENGTH = 100;
 
 const formatDate = (dateString) => {
@@ -23,10 +24,19 @@ const BlogPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("");
+  const [categories, setCategories] = useState([]);
   const [page, setPage] = useState(1);
   const [count, setCount] = useState(0);
   const [hasNext, setHasNext] = useState(false);
   const [hasPrevious, setHasPrevious] = useState(false);
+
+  useEffect(() => {
+    apiClient
+      .get(CATEGORIES_URL)
+      .then((response) => setCategories(response.data))
+      .catch((fetchError) => Sentry.captureException(fetchError));
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -34,7 +44,9 @@ const BlogPage = () => {
     setError(null);
 
     apiClient
-      .get(ARTICLES_URL, { params: { search: search || undefined, page } })
+      .get(ARTICLES_URL, {
+        params: { search: search || undefined, category: category || undefined, page },
+      })
       .then((response) => {
         if (!isMounted) return;
         setArticles(response.data.results);
@@ -54,10 +66,15 @@ const BlogPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [search, page]);
+  }, [search, category, page]);
 
   const handleSearchChange = (event) => {
     setSearch(event.target.value);
+    setPage(1);
+  };
+
+  const handleCategoryChange = (event) => {
+    setCategory(event.target.value);
     setPage(1);
   };
 
@@ -67,18 +84,45 @@ const BlogPage = () => {
         Le <span className="text-purple-text">Blog</span>
       </h1>
 
-      <div className="max-w-md mx-auto mb-10">
-        <label htmlFor="blog-search" className="sr-only">
-          Rechercher un article
-        </label>
-        <input
-          id="blog-search"
-          type="search"
-          placeholder="Rechercher un article..."
-          value={search}
-          onChange={handleSearchChange}
-          className="w-full px-4 py-2 rounded-lg bg-[#FFFFFF0D] border border-purple-text text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-text"
-        />
+      <div className="max-w-md mx-auto mb-10 space-y-4">
+        <div>
+          <label htmlFor="blog-search" className="sr-only">
+            Rechercher un article
+          </label>
+          <input
+            id="blog-search"
+            type="search"
+            placeholder="Rechercher un article..."
+            value={search}
+            onChange={handleSearchChange}
+            className="w-full px-4 py-2 rounded-lg bg-[#FFFFFF0D] border border-purple-text text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-text"
+          />
+        </div>
+
+        {categories.length > 0 && (
+          <div>
+            <label htmlFor="blog-category" className="sr-only">
+              Filtrer par catégorie
+            </label>
+            <select
+              id="blog-category"
+              value={category}
+              onChange={handleCategoryChange}
+              className="w-full px-4 py-2 rounded-lg bg-[#FFFFFF0D] border border-purple-text text-white focus:outline-none focus:ring-2 focus:ring-purple-text"
+            >
+              <option value="" className="bg-black">Toutes les catégories</option>
+              {categories.map((categoryOption) => (
+                <option
+                  key={categoryOption.id}
+                  value={categoryOption.id}
+                  className="bg-black"
+                >
+                  {categoryOption.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {isLoading && (
@@ -113,6 +157,11 @@ const BlogPage = () => {
                 key={article.id}
                 className="bg-[#FFFFFF0D] rounded-2xl p-6 flex flex-col"
               >
+                {article.category_name && (
+                  <span className="inline-block self-start mb-2 px-3 py-1 text-xs rounded-full bg-purple text-white">
+                    {article.category_name}
+                  </span>
+                )}
                 <h2 className="text-2xl font-bold mb-2">{article.title}</h2>
                 <p className="text-sm text-gray-400 mb-4">
                   {article.author} — {formatDate(article.created_at)}

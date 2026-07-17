@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as Sentry from "@sentry/react";
 import Form from "../components/Form";
@@ -6,13 +6,9 @@ import apiClient from "../api/axios";
 import { useAuth } from "../hooks/useAuth";
 
 const ARTICLES_URL = "/api/articles/";
+const CATEGORIES_URL = "/api/categories/";
 
-const INITIAL_VALUES = { title: "", content: "" };
-
-const fields = [
-  { name: "title", label: "Titre" },
-  { name: "content", label: "Contenu", type: "textarea", rows: 8, fullWidth: true },
-];
+const INITIAL_VALUES = { title: "", content: "", category: "" };
 
 const AddArticle = () => {
   const navigate = useNavigate();
@@ -21,6 +17,29 @@ const AddArticle = () => {
   const [errors, setErrors] = useState({});
   const [generalError, setGeneralError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    apiClient
+      .get(CATEGORIES_URL)
+      .then((response) => setCategories(response.data))
+      .catch((fetchError) => Sentry.captureException(fetchError));
+  }, []);
+
+  const fields = [
+    { name: "title", label: "Titre" },
+    { name: "content", label: "Contenu", type: "textarea", rows: 8, fullWidth: true },
+    {
+      name: "category",
+      label: "Catégorie",
+      type: "select",
+      fullWidth: true,
+      options: [
+        { value: "", label: "Aucune catégorie" },
+        ...categories.map((category) => ({ value: category.id, label: category.name })),
+      ],
+    },
+  ];
 
   const handleChange = (name, value) => {
     setValues((previous) => ({ ...previous, [name]: value }));
@@ -32,9 +51,11 @@ const AddArticle = () => {
     setIsSubmitting(true);
 
     const author = `${user?.first_name ?? ""} ${user?.last_name ?? ""}`.trim() || user?.email || "Membre";
+    const { category, ...rest } = values;
+    const payload = { ...rest, author, ...(category ? { category } : {}) };
 
     try {
-      await apiClient.post(ARTICLES_URL, { ...values, author });
+      await apiClient.post(ARTICLES_URL, payload);
       navigate("/blog");
     } catch (submitError) {
       const responseStatus = submitError.response?.status;

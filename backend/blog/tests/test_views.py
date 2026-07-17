@@ -4,7 +4,7 @@ from rest_framework.test import APIClient
 
 from accounts.tests.factories import UserFactory
 from blog.models import Article
-from blog.tests.factories import ArticleFactory
+from blog.tests.factories import ArticleFactory, CategoryFactory
 
 
 @pytest.fixture
@@ -199,3 +199,64 @@ class TestMyArticles:
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data == []
+
+
+@pytest.mark.django_db
+class TestCategoryList:
+    def test_list_categories(self, api_client):
+        CategoryFactory(name='Tech')
+        CategoryFactory(name='Culture')
+
+        response = api_client.get('/api/categories/')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert {item['name'] for item in response.data} == {'Tech', 'Culture'}
+
+    def test_list_categories_empty(self, api_client):
+        response = api_client.get('/api/categories/')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == []
+
+
+@pytest.mark.django_db
+class TestArticleCategoryFilter:
+    def test_filters_articles_by_category(self, api_client):
+        tech = CategoryFactory(name='Tech')
+        culture = CategoryFactory(name='Culture')
+        ArticleFactory(category=tech)
+        ArticleFactory(category=culture)
+
+        response = api_client.get(f'/api/articles/?category={tech.id}')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 1
+        assert response.data['results'][0]['category'] == tech.id
+
+    def test_invalid_category_is_ignored(self, api_client):
+        ArticleFactory.create_batch(2)
+
+        response = api_client.get('/api/articles/?category=not-a-number')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 2
+
+    def test_article_includes_category_name(self, api_client, member):
+        tech = CategoryFactory(name='Tech')
+
+        response = api_client.post('/api/articles/', {
+            'title': 'My article',
+            'content': 'Some content',
+            'author': 'Alice',
+            'category': tech.id,
+        })
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data['category_name'] == 'Tech'
+
+    def test_article_without_category_has_null_category_name(self, api_client):
+        ArticleFactory(category=None)
+
+        response = api_client.get('/api/articles/')
+
+        assert response.data['results'][0]['category_name'] is None
