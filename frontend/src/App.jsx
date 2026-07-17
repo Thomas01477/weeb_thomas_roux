@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import About from './pages/About';
 import BlogPage from './pages/BlogPage';
+import ArticleDetailPage from './pages/ArticleDetailPage';
 import Account from './pages/Account';
 import AddArticle from './pages/AddArticle';
 import MyArticlesPage from './pages/MyArticlesPage';
@@ -24,6 +25,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/about" element={<About />} />
         <Route path="/blog" element={<BlogPage />} />
+        <Route path="/blog/:id" element={<ArticleDetailPage />} />
         <Route
           path="/account"
           element={

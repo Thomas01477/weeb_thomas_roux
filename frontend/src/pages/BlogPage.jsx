@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import * as Sentry from "@sentry/react";
 import apiClient from "../api/axios";
 
@@ -153,9 +154,10 @@ const BlogPage = () => {
 
           <div className="grid gap-6 md:grid-cols-2">
             {articles.map((article) => (
-              <article
+              <Link
                 key={article.id}
-                className="bg-[#FFFFFF0D] rounded-2xl p-6 flex flex-col"
+                to={`/blog/${article.id}`}
+                className="bg-[#FFFFFF0D] rounded-2xl p-6 flex flex-col hover:bg-[#FFFFFF1A] transition-colors"
               >
                 {article.category_name && (
                   <span className="inline-block self-start mb-2 px-3 py-1 text-xs rounded-full bg-purple text-white">
@@ -167,7 +169,7 @@ const BlogPage = () => {
                   {article.author} — {formatDate(article.created_at)}
                 </p>
                 <p className="text-gray-300">{getExcerpt(article.content)}</p>
-              </article>
+              </Link>
             ))}
           </div>
 

@@ -1,5 +1,6 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import BlogPage from "../pages/BlogPage";
 import apiClient from "../api/axios";
 
@@ -11,6 +12,13 @@ const paginatedResponse = (results, overrides = {}) => ({
   data: { count: results.length, next: null, previous: null, results, ...overrides },
 });
 
+const renderBlogPage = () =>
+  render(
+    <MemoryRouter>
+      <BlogPage />
+    </MemoryRouter>
+  );
+
 describe("BlogPage", () => {
   afterEach(() => {
     vi.clearAllMocks();
@@ -19,7 +27,7 @@ describe("BlogPage", () => {
   it("affiche un loader pendant le chargement", () => {
     apiClient.get.mockReturnValue(new Promise(() => {}));
 
-    render(<BlogPage />);
+    renderBlogPage();
 
     expect(screen.getByRole("status")).toHaveTextContent(
       "Chargement des articles..."
@@ -38,7 +46,7 @@ describe("BlogPage", () => {
     ];
     apiClient.get.mockResolvedValue(paginatedResponse(articles));
 
-    render(<BlogPage />);
+    renderBlogPage();
 
     await waitFor(() => {
       expect(screen.getByText("Premier article")).toBeInTheDocument();
@@ -52,7 +60,7 @@ describe("BlogPage", () => {
   it("affiche un message d'erreur si le fetch échoue", async () => {
     apiClient.get.mockRejectedValue(new Error("network error"));
 
-    render(<BlogPage />);
+    renderBlogPage();
 
     await waitFor(() => {
       expect(screen.getByRole("alert")).toHaveTextContent(
@@ -75,7 +83,7 @@ describe("BlogPage", () => {
       ])
     );
 
-    render(<BlogPage />);
+    renderBlogPage();
     await waitFor(() => expect(screen.getByText("Premier article")).toBeInTheDocument());
 
     apiClient.get.mockResolvedValue(
@@ -106,7 +114,7 @@ describe("BlogPage", () => {
     const user = userEvent.setup();
     apiClient.get.mockResolvedValue(paginatedResponse([]));
 
-    render(<BlogPage />);
+    renderBlogPage();
     await waitFor(() =>
       expect(screen.getByText("Aucun article pour le moment.")).toBeInTheDocument()
     );
@@ -129,7 +137,7 @@ describe("BlogPage", () => {
       )
     );
 
-    render(<BlogPage />);
+    renderBlogPage();
     await waitFor(() => expect(screen.getByText("Article page 1")).toBeInTheDocument());
 
     apiClient.get.mockResolvedValue(
@@ -170,12 +178,12 @@ describe("BlogPage", () => {
       );
     });
 
-    render(<BlogPage />);
+    renderBlogPage();
 
     await waitFor(() => {
       expect(screen.getByText("Article catégorisé")).toBeInTheDocument();
     });
-    const article = screen.getByText("Article catégorisé").closest("article");
+    const article = screen.getByText("Article catégorisé").closest("a");
     expect(within(article).getByText("Tech")).toBeInTheDocument();
   });
 
@@ -203,7 +211,7 @@ describe("BlogPage", () => {
       );
     });
 
-    render(<BlogPage />);
+    renderBlogPage();
     await waitFor(() => expect(screen.getByText("Article Tech")).toBeInTheDocument());
 
     await user.selectOptions(screen.getByLabelText("Filtrer par catégorie"), "1");
