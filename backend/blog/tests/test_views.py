@@ -69,6 +69,25 @@ class TestArticleList:
         assert response.data['count'] == 1
         assert response.data['results'][0]['author'] == 'Alice'
 
+    def test_list_filtered_by_author_me(self, api_client, member):
+        ArticleFactory(owner=member)
+        other_owner = UserFactory(is_active=True)
+        ArticleFactory(owner=other_owner)
+
+        response = api_client.get('/api/articles/?author=me')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 1
+        assert response.data['results'][0]['owner'] == member.id
+
+    def test_filter_by_author_me_without_auth_returns_all(self, api_client):
+        ArticleFactory.create_batch(2)
+
+        response = api_client.get('/api/articles/?author=me')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 2
+
     def test_list_searched_by_title_or_content(self, api_client):
         ArticleFactory(title='Découvrir Weeb', content='Un article ordinaire.')
         ArticleFactory(title='Autre sujet', content='Parle aussi de weeb ici.')
@@ -147,6 +166,16 @@ class TestArticleDetail:
         response = api_client.patch(f'/api/articles/{article.id}/', {'title': ''})
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
+        article.refresh_from_db()
+        assert article.title == 'Old title'
+
+    def test_update_other_members_article(self, api_client, member):
+        other_owner = UserFactory(is_active=True)
+        article = ArticleFactory(title='Old title', owner=other_owner)
+
+        response = api_client.patch(f'/api/articles/{article.id}/', {'title': 'Hacked'})
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
         article.refresh_from_db()
         assert article.title == 'Old title'
 
