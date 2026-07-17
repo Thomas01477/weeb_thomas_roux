@@ -2,6 +2,11 @@
 
 Application web fullstack composée d'un frontend React, d'un backend Django REST.
 
+## Production
+
+- **Application :** https://weeb-thomas-roux.vercel.app/
+- **Status page (UptimeRobot) :** https://stats.uptimerobot.com/xx9MwZ9kQm
+
 ## Structure du projet
 
 ```
