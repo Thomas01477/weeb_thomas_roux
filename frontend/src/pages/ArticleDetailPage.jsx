@@ -63,6 +63,8 @@ const ArticleDetailPage = () => {
     };
   }, [id]);
 
+  // UI-only gate for showing the edit/delete buttons; the API re-checks
+  // ownership (see blog/views.py::article_detail) so this can't be bypassed.
   const isAuthor = Boolean(user && article && article.owner === user.id);
 
   const startEdit = () => {

@@ -50,6 +50,9 @@ const AddArticle = () => {
     setGeneralError("");
     setIsSubmitting(true);
 
+    // Author is a plain text field on the article, not a live reference to
+    // the user, so it's derived once here: full name, falling back to email
+    // then a generic label if the profile has neither.
     const author = `${user?.first_name ?? ""} ${user?.last_name ?? ""}`.trim() || user?.email || "Membre";
     const { category, ...rest } = values;
     const payload = { ...rest, author, ...(category ? { category } : {}) };

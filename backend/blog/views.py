@@ -16,6 +16,9 @@ class ArticlePagination(PageNumberPagination):
 
 
 def _require_active_member(request):
+    """Write actions need an authenticated AND validated account: a signed-up
+    but not-yet-approved user (see CustomUser.is_active) can browse and read
+    but not create, edit or delete articles."""
     if not request.user.is_authenticated:
         raise NotAuthenticated()
     if not request.user.is_active:
@@ -80,6 +83,7 @@ def article_detail(request, pk):
         return Response(serializer.data)
 
     _require_active_member(request)
+    # Staff can moderate any article; regular members can only touch their own.
     if not request.user.is_staff and article.owner_id != request.user.id:
         raise PermissionDenied('You can only modify your own articles.')
 
