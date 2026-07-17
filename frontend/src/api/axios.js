@@ -24,6 +24,9 @@ const apiClient = axios.create({ baseURL: BASE_URL });
 
 apiClient.interceptors.request.use(attachAuthHeader);
 
+// On a 401, try once to refresh the access token and replay the original
+// request transparently. `_retry` guards against looping if the retried
+// request itself comes back 401 (e.g. the refresh token is also invalid).
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {

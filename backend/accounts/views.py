@@ -42,6 +42,8 @@ def login(request):
     try:
         user = User.objects.get(email=email)
     except User.DoesNotExist:
+        # Same generic message whether the email is unknown or the password
+        # is wrong, so a failed login can't be used to enumerate accounts.
         return Response({'detail': 'Invalid credentials.'}, status=status.HTTP_401_UNAUTHORIZED)
 
     if not user.check_password(password):

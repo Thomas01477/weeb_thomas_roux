@@ -13,6 +13,9 @@ const getStoredUser = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(getStoredUser);
 
+  // axios.js clears the session and dispatches this event when a token
+  // refresh fails; listening for it (instead of axios calling back into the
+  // context directly) keeps the API client decoupled from React state.
   useEffect(() => {
     const handleLogout = () => setUser(null);
     window.addEventListener(AUTH_LOGOUT_EVENT, handleLogout);

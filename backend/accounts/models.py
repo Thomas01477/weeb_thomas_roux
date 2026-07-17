@@ -9,6 +9,10 @@ class CustomUserManager(UserManager):
 
 
 class CustomUser(AbstractUser):
+    """New accounts are inactive until a staff member validates them in the
+    admin; superusers are the only ones activated automatically at creation
+    time (see CustomUserManager.create_superuser)."""
+
     is_active = models.BooleanField(default=False)
 
     objects = CustomUserManager()
