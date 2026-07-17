@@ -1,12 +1,18 @@
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import NotAuthenticated, PermissionDenied
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Article
 from .serializers import ArticleSerializer
+
+
+class ArticlePagination(PageNumberPagination):
+    page_size = 10
 
 
 def _require_active_member(request):
@@ -28,8 +34,19 @@ def my_articles(request):
 def article_list(request):
     if request.method == 'GET':
         articles = Article.objects.all().order_by('-created_at')
-        serializer = ArticleSerializer(articles, many=True)
-        return Response(serializer.data)
+
+        author = request.query_params.get('author')
+        if author:
+            articles = articles.filter(author__icontains=author)
+
+        search = request.query_params.get('search')
+        if search:
+            articles = articles.filter(Q(title__icontains=search) | Q(content__icontains=search))
+
+        paginator = ArticlePagination()
+        page = paginator.paginate_queryset(articles, request)
+        serializer = ArticleSerializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
     _require_active_member(request)
 

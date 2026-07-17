@@ -32,7 +32,8 @@ class TestArticleList:
         response = api_client.get('/api/articles/')
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data == []
+        assert response.data['count'] == 0
+        assert response.data['results'] == []
 
     def test_list_returns_existing_articles(self, api_client):
         ArticleFactory.create_batch(3)
@@ -40,7 +41,43 @@ class TestArticleList:
         response = api_client.get('/api/articles/')
 
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == 3
+        assert response.data['count'] == 3
+        assert len(response.data['results']) == 3
+
+    def test_list_is_paginated(self, api_client):
+        ArticleFactory.create_batch(12)
+
+        first_page = api_client.get('/api/articles/')
+
+        assert first_page.status_code == status.HTTP_200_OK
+        assert first_page.data['count'] == 12
+        assert len(first_page.data['results']) == 10
+        assert first_page.data['next'] is not None
+
+        second_page = api_client.get('/api/articles/?page=2')
+
+        assert len(second_page.data['results']) == 2
+        assert second_page.data['next'] is None
+
+    def test_list_filtered_by_author(self, api_client):
+        ArticleFactory(author='Alice')
+        ArticleFactory(author='Bob')
+
+        response = api_client.get('/api/articles/?author=Alice')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 1
+        assert response.data['results'][0]['author'] == 'Alice'
+
+    def test_list_searched_by_title_or_content(self, api_client):
+        ArticleFactory(title='Découvrir Weeb', content='Un article ordinaire.')
+        ArticleFactory(title='Autre sujet', content='Parle aussi de weeb ici.')
+        ArticleFactory(title='Sans rapport', content='Contenu neutre.')
+
+        response = api_client.get('/api/articles/?search=weeb')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 2
 
     def test_create_article(self, api_client, member):
         payload = {

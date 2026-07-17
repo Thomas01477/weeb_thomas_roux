@@ -62,7 +62,9 @@ describe("AddArticle", () => {
       content: "Contenu de l'article.",
     };
     apiClient.post.mockResolvedValue({ data: newArticle });
-    apiClient.get.mockResolvedValue({ data: [newArticle] });
+    apiClient.get.mockResolvedValue({
+      data: { count: 1, next: null, previous: null, results: [newArticle] },
+    });
 
     renderApp("/add-article");
     await user.type(screen.getByLabelText("Titre"), "Mon nouvel article");

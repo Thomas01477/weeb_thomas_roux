@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import BlogPage from "../pages/BlogPage";
 import apiClient from "../api/axios";
 
@@ -6,9 +7,13 @@ vi.mock("../api/axios", () => ({
   default: { get: vi.fn() },
 }));
 
+const paginatedResponse = (results, overrides = {}) => ({
+  data: { count: results.length, next: null, previous: null, results, ...overrides },
+});
+
 describe("BlogPage", () => {
   afterEach(() => {
-    vi.restoreAllMocks();
+    vi.clearAllMocks();
   });
 
   it("affiche un loader pendant le chargement", () => {
@@ -31,7 +36,7 @@ describe("BlogPage", () => {
         content: "Contenu du premier article.",
       },
     ];
-    apiClient.get.mockResolvedValue({ data: articles });
+    apiClient.get.mockResolvedValue(paginatedResponse(articles));
 
     render(<BlogPage />);
 
@@ -54,5 +59,94 @@ describe("BlogPage", () => {
         "Impossible de charger les articles pour le moment."
       );
     });
+  });
+
+  it("filtre les articles via le champ de recherche", async () => {
+    const user = userEvent.setup();
+    apiClient.get.mockResolvedValue(
+      paginatedResponse([
+        {
+          id: 1,
+          title: "Premier article",
+          author: "Alice",
+          created_at: "2026-01-15T10:00:00Z",
+          content: "Contenu.",
+        },
+      ])
+    );
+
+    render(<BlogPage />);
+    await waitFor(() => expect(screen.getByText("Premier article")).toBeInTheDocument());
+
+    apiClient.get.mockResolvedValue(
+      paginatedResponse([
+        {
+          id: 2,
+          title: "Article sur Weeb",
+          author: "Bob",
+          created_at: "2026-01-16T10:00:00Z",
+          content: "Contenu.",
+        },
+      ])
+    );
+
+    await user.type(screen.getByLabelText("Rechercher un article"), "Weeb");
+
+    await waitFor(() => {
+      expect(apiClient.get).toHaveBeenLastCalledWith("/api/articles/", {
+        params: { search: "Weeb", page: 1 },
+      });
+    });
+    await waitFor(() => {
+      expect(screen.getByText("Article sur Weeb")).toBeInTheDocument();
+    });
+  });
+
+  it("affiche un message dédié si la recherche ne retourne rien", async () => {
+    const user = userEvent.setup();
+    apiClient.get.mockResolvedValue(paginatedResponse([]));
+
+    render(<BlogPage />);
+    await waitFor(() =>
+      expect(screen.getByText("Aucun article pour le moment.")).toBeInTheDocument()
+    );
+
+    await user.type(screen.getByLabelText("Rechercher un article"), "introuvable");
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Aucun article ne correspond à votre recherche.")
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("navigue entre les pages avec les contrôles de pagination", async () => {
+    const user = userEvent.setup();
+    apiClient.get.mockResolvedValue(
+      paginatedResponse(
+        [{ id: 1, title: "Article page 1", author: "Alice", created_at: "2026-01-15T10:00:00Z", content: "C." }],
+        { count: 11, next: "http://api/articles/?page=2", previous: null }
+      )
+    );
+
+    render(<BlogPage />);
+    await waitFor(() => expect(screen.getByText("Article page 1")).toBeInTheDocument());
+
+    apiClient.get.mockResolvedValue(
+      paginatedResponse(
+        [{ id: 2, title: "Article page 2", author: "Bob", created_at: "2026-01-16T10:00:00Z", content: "C." }],
+        { count: 11, next: null, previous: "http://api/articles/?page=1" }
+      )
+    );
+
+    await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+    await waitFor(() => {
+      expect(apiClient.get).toHaveBeenLastCalledWith("/api/articles/", {
+        params: { search: undefined, page: 2 },
+      });
+    });
+    await waitFor(() => expect(screen.getByText("Article page 2")).toBeInTheDocument());
+    expect(screen.getByRole("button", { name: /suivant/i })).toBeDisabled();
   });
 });
