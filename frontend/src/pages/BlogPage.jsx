@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import * as Sentry from "@sentry/react";
 import apiClient from "../api/axios";
 
 const ARTICLES_URL = "/api/articles/";
@@ -27,7 +28,8 @@ const BlogPage = () => {
       try {
         const response = await apiClient.get(ARTICLES_URL);
         setArticles(response.data);
-      } catch {
+      } catch (fetchError) {
+        Sentry.captureException(fetchError);
         setError("Impossible de charger les articles pour le moment.");
       } finally {
         setIsLoading(false);

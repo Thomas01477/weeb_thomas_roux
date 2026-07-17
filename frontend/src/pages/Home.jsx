@@ -33,6 +33,18 @@ function Home() {
             <Button>Découvrir les articles</Button>
             <Button variant="outline">S'abonner à la newsletter</Button>
           </div>
+          {import.meta.env.DEV && (
+            // Bouton de validation Sentry — visible uniquement en dev, a retirer une fois l'integration verifiee.
+            <button
+              type="button"
+              className="mt-4 text-xs text-red-400 underline"
+              onClick={() => {
+                throw new Error("Test Sentry Frontend");
+              }}
+            >
+              Test Sentry
+            </button>
+          )}
         </div>
         <div className="mt-16 px-4">
           <img
