@@ -10,6 +10,7 @@ import About from './pages/About';
 import BlogPage from './pages/BlogPage';
 import Account from './pages/Account';
 import AddArticle from './pages/AddArticle';
+import MyArticlesPage from './pages/MyArticlesPage';
 import PrivateRoute from './components/PrivateRoute';
 
 function App() {
@@ -44,6 +45,14 @@ function App() {
           element={
             <PrivateRoute>
               <AddArticle />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/my-articles"
+          element={
+            <PrivateRoute>
+              <MyArticlesPage />
             </PrivateRoute>
           }
         />

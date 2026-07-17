@@ -137,3 +137,28 @@ class TestArticleDetail:
         response = api_client.delete(f'/api/articles/{article.id}/')
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
+
+
+@pytest.mark.django_db
+class TestMyArticles:
+    def test_requires_authentication(self, api_client):
+        response = api_client.get('/api/articles/mine/')
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_returns_only_own_articles(self, api_client, member):
+        ArticleFactory.create_batch(2, owner=member)
+        other_owner = UserFactory(is_active=True)
+        ArticleFactory(owner=other_owner)
+
+        response = api_client.get('/api/articles/mine/')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 2
+        assert all(Article.objects.get(id=item['id']).owner_id == member.id for item in response.data)
+
+    def test_returns_empty_list_when_no_articles(self, api_client, member):
+        response = api_client.get('/api/articles/mine/')
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == []

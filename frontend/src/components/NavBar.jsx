@@ -32,6 +32,9 @@ const NavBar = () => {
             {isAuthenticated && (
               <Link to="/add-article" className="hover:text-purple-text">Ajouter un article</Link>
             )}
+            {isAuthenticated && (
+              <Link to="/my-articles" className="hover:text-purple-text">Mes articles</Link>
+            )}
             {isAuthenticated && user?.is_staff && (
               <a href={ADMIN_URL} className="hover:text-purple-text">Admin</a>
             )}
@@ -77,6 +80,9 @@ const NavBar = () => {
           <Link to="/contact" className="hover:text-purple-text" onClick={() => setIsOpen(false)}>Contact</Link>
           {isAuthenticated && (
             <Link to="/add-article" className="hover:text-purple-text" onClick={() => setIsOpen(false)}>Ajouter un article</Link>
+          )}
+          {isAuthenticated && (
+            <Link to="/my-articles" className="hover:text-purple-text" onClick={() => setIsOpen(false)}>Mes articles</Link>
           )}
           {isAuthenticated && user?.is_staff && (
             <a href={ADMIN_URL} className="hover:text-purple-text" onClick={() => setIsOpen(false)}>Admin</a>
