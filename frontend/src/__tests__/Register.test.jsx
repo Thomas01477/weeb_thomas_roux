@@ -41,6 +41,33 @@ describe("Register", () => {
     });
   });
 
+  it("affiche un message générique si l'email est déjà utilisé, sans le révéler", async () => {
+    const user = userEvent.setup();
+    globalThis.fetch.mockResolvedValue({
+      status: 400,
+      json: async () => ({
+        detail: "Les informations fournies sont invalides. Vérifiez les champs et réessayez.",
+      }),
+    });
+
+    renderRegister();
+    await user.type(screen.getByPlaceholderText("Prénom"), "John");
+    await user.type(screen.getByPlaceholderText("Nom"), "Doe");
+    await user.type(screen.getByPlaceholderText("Adresse e-mail"), "existing@example.com");
+    await user.type(screen.getByPlaceholderText("Mot de passe"), "s3curePassw0rd");
+    await user.type(screen.getByPlaceholderText("Confirmer le mot de passe"), "s3curePassw0rd");
+    await user.click(screen.getByRole("button", { name: /s'inscrire/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Les informations fournies sont invalides. Vérifiez les champs et réessayez."
+      );
+    });
+    const alertText = screen.getByRole("alert").textContent.toLowerCase();
+    expect(alertText).not.toContain("exist");
+    expect(alertText).not.toContain("déjà");
+  });
+
   it("affiche une erreur si les mots de passe ne correspondent pas", async () => {
     const user = userEvent.setup();
 

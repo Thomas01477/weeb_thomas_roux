@@ -14,10 +14,20 @@ User = get_user_model()
 @permission_classes([AllowAny])
 def register(request):
     serializer = RegisterSerializer(data=request.data)
-    if serializer.is_valid():
-        user = serializer.save()
-        return Response(RegisterSerializer(user).data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    email = serializer.validated_data['email']
+    if User.objects.filter(email=email).exists():
+        # Generic message on purpose: a field-specific "email already exists" error
+        # would let an attacker enumerate registered accounts.
+        return Response(
+            {'detail': 'Les informations fournies sont invalides. Vérifiez les champs et réessayez.'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    user = serializer.save()
+    return Response(RegisterSerializer(user).data, status=status.HTTP_201_CREATED)
 
 
 @api_view(['POST'])
