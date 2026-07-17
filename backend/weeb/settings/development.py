@@ -22,3 +22,8 @@ else:
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
 ]
+
+# "View site" link in the Django admin header points at the frontend
+# instead of the backend itself — reuses CORS_ALLOWED_ORIGINS so there's
+# no separate variable to keep in sync.
+FRONTEND_URL = CORS_ALLOWED_ORIGINS[0]

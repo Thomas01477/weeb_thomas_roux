@@ -17,6 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+import weeb.admin  # noqa: F401  registers the "View site" -> frontend patch
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('blog.urls')),
