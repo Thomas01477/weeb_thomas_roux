@@ -44,4 +44,13 @@ describe("NavBar", () => {
 
     expect(screen.getAllByText("Admin").length).toBeGreaterThan(0);
   });
+
+  it("n'affiche pas le lien Admin pour un membre authentifié non-staff", () => {
+    localStorage.setItem("access_token", "valid-token");
+    localStorage.setItem("user", JSON.stringify({ email: "john@example.com", is_staff: false }));
+
+    renderNavBar();
+
+    expect(screen.queryByText("Admin")).not.toBeInTheDocument();
+  });
 });
