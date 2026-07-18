@@ -36,3 +36,21 @@ class TestContactMessageAdmin:
         response = client.get(reverse('admin:contact_contactmessage_changelist'))
 
         assert response.status_code == 302
+
+    def test_export_as_csv_action(self, client):
+        admin = UserFactory(is_active=True, is_staff=True, is_superuser=True)
+        client.force_login(admin)
+        message = ContactMessage.objects.create(
+            name='Bob', email='bob@example.com', message='Great!', satisfaction=1
+        )
+
+        response = client.post(
+            reverse('admin:contact_contactmessage_changelist'),
+            {'action': 'export_as_csv', '_selected_action': [message.pk]},
+        )
+
+        assert response.status_code == 200
+        assert response['Content-Type'] == 'text/csv'
+        rows = response.content.decode().splitlines()
+        assert rows[0] == 'id,name,email,message,created_at,satisfaction'
+        assert 'Bob' in rows[1]

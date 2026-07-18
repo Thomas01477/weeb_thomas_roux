@@ -1,3 +1,6 @@
+import csv
+
+from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import NotAuthenticated, PermissionDenied
@@ -35,3 +38,26 @@ def _analyze_satisfaction(message):
         message.save(update_fields=['satisfaction'])
     except Exception:
         pass
+
+
+@api_view(['GET'])
+def export_contact_csv(request):
+    if not request.user.is_authenticated:
+        raise NotAuthenticated()
+    if not request.user.is_staff:
+        raise PermissionDenied('Only admins can export contact messages.')
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="contacts.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['id', 'name', 'email', 'message', 'created_at', 'satisfaction'])
+    for message in ContactMessage.objects.all().order_by('-created_at'):
+        writer.writerow([
+            message.id,
+            message.name,
+            message.email,
+            message.message,
+            message.created_at,
+            message.satisfaction,
+        ])
+    return response
