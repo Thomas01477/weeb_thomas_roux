@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -20,10 +22,38 @@ class TestContactList:
             'message': 'Great service, thanks!',
         }
 
-        response = api_client.post('/api/contact/', payload)
+        with patch('contact.ml_utils.predict', return_value=1):
+            response = api_client.post('/api/contact/', payload)
 
         assert response.status_code == status.HTTP_201_CREATED
         assert ContactMessage.objects.count() == 1
+
+    def test_create_message_runs_sentiment_analysis(self, api_client):
+        payload = {
+            'name': 'Alice',
+            'email': 'alice@example.com',
+            'message': 'Great service, thanks!',
+        }
+
+        with patch('contact.ml_utils.predict', return_value=1) as mock_predict:
+            response = api_client.post('/api/contact/', payload)
+
+        mock_predict.assert_called_once_with('Great service, thanks!')
+        message = ContactMessage.objects.get()
+        assert message.satisfaction == 1
+        assert response.data['satisfaction'] == 1
+
+    def test_create_message_survives_missing_model(self, api_client):
+        payload = {
+            'name': 'Alice',
+            'email': 'alice@example.com',
+            'message': 'Great service, thanks!',
+        }
+
+        with patch('contact.ml_utils.predict', side_effect=FileNotFoundError):
+            response = api_client.post('/api/contact/', payload)
+
+        assert response.status_code == status.HTTP_201_CREATED
         message = ContactMessage.objects.get()
         assert message.satisfaction is None
 

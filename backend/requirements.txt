@@ -13,3 +13,5 @@ factory-boy
 pytest-cov
 flake8
 sentry-sdk[django]
+joblib
+scikit-learn

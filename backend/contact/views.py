@@ -21,6 +21,17 @@ def contact_list(request):
 
     serializer = ContactMessageSerializer(data=request.data)
     if serializer.is_valid():
-        serializer.save()
+        message = serializer.save()
+        _analyze_satisfaction(message)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def _analyze_satisfaction(message):
+    """Run the sentiment model on the message; leave satisfaction unset if it is unavailable."""
+    try:
+        from .ml_utils import predict
+        message.satisfaction = predict(message.message)
+        message.save(update_fields=['satisfaction'])
+    except Exception:
+        pass
