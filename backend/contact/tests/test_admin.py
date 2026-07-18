@@ -2,11 +2,24 @@ import pytest
 from django.urls import reverse
 
 from accounts.tests.factories import UserFactory
+from contact.admin import ContactMessageAdmin
 from contact.models import ContactMessage
 
 
 @pytest.mark.django_db
 class TestContactMessageAdmin:
+    def test_satisfaction_display_satisfied(self):
+        message = ContactMessage(satisfaction=1)
+        assert ContactMessageAdmin.satisfaction_display(None, message) == 'Satisfied'
+
+    def test_satisfaction_display_not_satisfied(self):
+        message = ContactMessage(satisfaction=0)
+        assert ContactMessageAdmin.satisfaction_display(None, message) == 'Not satisfied'
+
+    def test_satisfaction_display_not_analyzed(self):
+        message = ContactMessage(satisfaction=None)
+        assert ContactMessageAdmin.satisfaction_display(None, message) == 'Not analyzed'
+
     def test_superuser_can_access_changelist(self, client):
         admin = UserFactory(is_active=True, is_staff=True, is_superuser=True)
         client.force_login(admin)
