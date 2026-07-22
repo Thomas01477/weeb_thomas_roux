@@ -163,6 +163,76 @@ describe("BlogPage", () => {
     expect(screen.getByRole("button", { name: /suivant/i })).toBeDisabled();
   });
 
+  it("désactive Première page et active Dernière page sur la première page", async () => {
+    apiClient.get.mockResolvedValue(
+      paginatedResponse(
+        [{ id: 1, title: "Article page 1", author: "Alice", created_at: "2026-01-15T10:00:00Z", content: "C." }],
+        { count: 11, next: "http://api/articles/?page=2", previous: null }
+      )
+    );
+
+    renderBlogPage();
+    await waitFor(() => expect(screen.getByText("Article page 1")).toBeInTheDocument());
+
+    expect(screen.getByRole("button", { name: /première page/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /dernière page/i })).not.toBeDisabled();
+  });
+
+  it("désactive Dernière page et active Première page sur la dernière page", async () => {
+    const user = userEvent.setup();
+    apiClient.get.mockResolvedValue(
+      paginatedResponse(
+        [{ id: 1, title: "Article page 1", author: "Alice", created_at: "2026-01-15T10:00:00Z", content: "C." }],
+        { count: 11, next: "http://api/articles/?page=2", previous: null }
+      )
+    );
+
+    renderBlogPage();
+    await waitFor(() => expect(screen.getByText("Article page 1")).toBeInTheDocument());
+
+    apiClient.get.mockResolvedValue(
+      paginatedResponse(
+        [{ id: 2, title: "Article page 2", author: "Bob", created_at: "2026-01-16T10:00:00Z", content: "C." }],
+        { count: 11, next: null, previous: "http://api/articles/?page=1" }
+      )
+    );
+
+    await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+    await waitFor(() => expect(screen.getByText("Article page 2")).toBeInTheDocument());
+    expect(screen.getByRole("button", { name: /dernière page/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /première page/i })).not.toBeDisabled();
+  });
+
+  it("va directement à la dernière page via le bouton dédié", async () => {
+    const user = userEvent.setup();
+    apiClient.get.mockResolvedValue(
+      paginatedResponse(
+        [{ id: 1, title: "Article page 1", author: "Alice", created_at: "2026-01-15T10:00:00Z", content: "C." }],
+        { count: 11, next: "http://api/articles/?page=2", previous: null }
+      )
+    );
+
+    renderBlogPage();
+    await waitFor(() => expect(screen.getByText("Article page 1")).toBeInTheDocument());
+
+    apiClient.get.mockResolvedValue(
+      paginatedResponse(
+        [{ id: 2, title: "Article page 2", author: "Bob", created_at: "2026-01-16T10:00:00Z", content: "C." }],
+        { count: 11, next: null, previous: "http://api/articles/?page=1" }
+      )
+    );
+
+    await user.click(screen.getByRole("button", { name: /dernière page/i }));
+
+    await waitFor(() => {
+      expect(apiClient.get).toHaveBeenLastCalledWith("/api/articles/", {
+        params: { search: undefined, category: undefined, author: undefined, page: 2 },
+      });
+    });
+    await waitFor(() => expect(screen.getByText("Article page 2")).toBeInTheDocument());
+  });
+
   it("affiche le badge de catégorie sur un article qui en a une", async () => {
     apiClient.get.mockImplementation((url) => {
       if (url === "/api/categories/") {
