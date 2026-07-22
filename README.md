@@ -51,13 +51,28 @@ Python 3.11, Node.js 20, Git.
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate        # Windows : venv\Scripts\activate
+source venv/bin/activate        # Windows (PowerShell) : venv\Scripts\activate
 pip install -r requirements.txt
 cp .env.example .env            # remplir SECRET_KEY (les autres variables sont optionnelles en dev)
 python manage.py migrate
-python manage.py createsuperuser
+```
+
+Créer le compte admin (une seule fois) :
+
+- **macOS / Linux :**
+  ```bash
+  DJANGO_SUPERUSER_USERNAME=admin DJANGO_SUPERUSER_EMAIL=admin@example.com DJANGO_SUPERUSER_PASSWORD=password python manage.py createsuperuser --noinput
+  ```
+- **Windows (PowerShell) :**
+  ```powershell
+  $env:DJANGO_SUPERUSER_USERNAME="admin"; $env:DJANGO_SUPERUSER_EMAIL="admin@example.com"; $env:DJANGO_SUPERUSER_PASSWORD="password"; python manage.py createsuperuser --noinput
+  ```
+
+```bash
 python manage.py runserver      # http://localhost:8000
 ```
+
+Sur http://localhost:8000/admin/, se connecter avec `admin` (le nom d'utilisateur), pas l'adresse email.
 
 ### Frontend
 
