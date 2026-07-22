@@ -24,40 +24,37 @@ const NavBar = () => {
         </Link>
 
         {/* Desktop Links */}
-        <div className="flex justify-between items-center w-full ml-8">
-          <div className="hidden md:flex items-center space-x-6">
-            <Link to="/about" className="hover:text-purple-text">À propos de nous</Link>
-            <Link to="/blog" className="hover:text-purple-text">Blog</Link>
-            <Link to="/contact" className="hover:text-purple-text">Contact</Link>
+        <div className="hidden lg:flex justify-between items-center w-full ml-8">
+          <div className="flex items-center space-x-4">
+            <Link to="/about" className="whitespace-nowrap hover:text-purple-text">À propos de nous</Link>
+            <Link to="/blog" className="whitespace-nowrap hover:text-purple-text">Blog</Link>
+            <Link to="/contact" className="whitespace-nowrap hover:text-purple-text">Contact</Link>
             {isAuthenticated && (
-              <Link to="/add-article" className="hover:text-purple-text">Ajouter un article</Link>
-            )}
-            {isAuthenticated && (
-              <Link to="/my-articles" className="hover:text-purple-text">Mes articles</Link>
+              <Link to="/add-article" className="whitespace-nowrap hover:text-purple-text">Ajouter un article</Link>
             )}
             {isAuthenticated && user?.is_staff && (
-              <a href={ADMIN_URL} className="hover:text-purple-text">Admin</a>
+              <a href={ADMIN_URL} className="whitespace-nowrap hover:text-purple-text">Admin</a>
             )}
           </div>
-          <div className="hidden md:flex items-center space-x-6 ml-auto">
+          <div className="flex items-center space-x-4 ml-auto">
             {isAuthenticated ? (
               <>
-                <Link to="/account" className="px-4 py-2 rounded-lg hover:text-purple-text">Mon compte</Link>
-                <button onClick={handleLogout} className="px-4 py-2 bg-purple rounded-lg hover:bg-purple-form cursor-pointer">
+                <Link to="/account" className="whitespace-nowrap px-4 py-2 rounded-lg hover:text-purple-text">Mon compte</Link>
+                <button onClick={handleLogout} className="whitespace-nowrap px-4 py-2 bg-purple rounded-lg hover:bg-purple-form cursor-pointer">
                   Déconnexion
                 </button>
               </>
             ) : (
               <>
-                <Link to="/login" className="px-4 py-2 rounded-lg hover:text-purple-text">Connexion</Link>
-                <Link to="/register" className="px-4 py-2 bg-purple rounded-lg hover:bg-purple-form">S'inscrire</Link>
+                <Link to="/login" className="whitespace-nowrap px-4 py-2 rounded-lg hover:text-purple-text">Connexion</Link>
+                <Link to="/register" className="whitespace-nowrap px-4 py-2 bg-purple rounded-lg hover:bg-purple-form">S'inscrire</Link>
               </>
             )}
           </div>
         </div>
 
         {/* Burger Menu Button */}
-        <button className="md:hidden" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle Menu">
+        <button className="lg:hidden" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle Menu">
           {isOpen ? (
             <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -74,15 +71,12 @@ const NavBar = () => {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="flex flex-col mt-4 space-y-3 md:hidden">
+        <div className="flex flex-col mt-4 space-y-3 lg:hidden">
           <Link to="/about" className="hover:text-purple-text" onClick={() => setIsOpen(false)}>À propos de nous</Link>
           <Link to="/blog" className="hover:text-purple-text" onClick={() => setIsOpen(false)}>Blog</Link>
           <Link to="/contact" className="hover:text-purple-text" onClick={() => setIsOpen(false)}>Contact</Link>
           {isAuthenticated && (
             <Link to="/add-article" className="hover:text-purple-text" onClick={() => setIsOpen(false)}>Ajouter un article</Link>
-          )}
-          {isAuthenticated && (
-            <Link to="/my-articles" className="hover:text-purple-text" onClick={() => setIsOpen(false)}>Mes articles</Link>
           )}
           {isAuthenticated && user?.is_staff && (
             <a href={ADMIN_URL} className="hover:text-purple-text" onClick={() => setIsOpen(false)}>Admin</a>

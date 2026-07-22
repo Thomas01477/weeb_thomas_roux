@@ -7,6 +7,7 @@ import { useAuth } from "../hooks/useAuth";
 const ARTICLES_URL = "/api/articles/";
 const CATEGORIES_URL = "/api/categories/";
 const EXCERPT_LENGTH = 100;
+const PAGE_SIZE = 10;
 
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString("fr-FR", {
@@ -91,6 +92,8 @@ const BlogPage = () => {
     setShowMine((previous) => !previous);
     setPage(1);
   };
+
+  const lastPage = Math.max(1, Math.ceil(count / PAGE_SIZE));
 
   return (
     <div className="max-w-[1000px] mx-auto px-6 text-white min-h-screen py-16">
@@ -205,6 +208,14 @@ const BlogPage = () => {
               <button
                 type="button"
                 disabled={!hasPrevious}
+                onClick={() => setPage(1)}
+                className="px-4 py-2 rounded-lg hover:text-purple-text disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              >
+                Première page
+              </button>
+              <button
+                type="button"
+                disabled={!hasPrevious}
                 onClick={() => setPage((previousPage) => previousPage - 1)}
                 className="px-4 py-2 rounded-lg hover:text-purple-text disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               >
@@ -218,6 +229,14 @@ const BlogPage = () => {
                 className="px-4 py-2 rounded-lg hover:text-purple-text disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               >
                 Suivant
+              </button>
+              <button
+                type="button"
+                disabled={!hasNext}
+                onClick={() => setPage(lastPage)}
+                className="px-4 py-2 rounded-lg hover:text-purple-text disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              >
+                Dernière page
               </button>
             </div>
           )}
