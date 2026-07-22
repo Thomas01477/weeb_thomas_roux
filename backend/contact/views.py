@@ -1,5 +1,7 @@
 import csv
+import threading
 
+import sentry_sdk
 from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -25,19 +27,27 @@ def contact_list(request):
     serializer = ContactMessageSerializer(data=request.data)
     if serializer.is_valid():
         message = serializer.save()
-        _analyze_satisfaction(message)
+        _run_in_background(_analyze_satisfaction, message)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+def _run_in_background(target, *args):
+    """Run target in a separate thread so the caller (the HTTP response) never
+    waits on it; the sentiment model load + inference can take long enough to
+    be noticeable otherwise."""
+    threading.Thread(target=target, args=args, daemon=True).start()
+
+
 def _analyze_satisfaction(message):
-    """Run the sentiment model on the message; leave satisfaction unset if it is unavailable."""
+    """Run the sentiment model on the message; leave satisfaction unset and
+    report to Sentry if it is unavailable or fails."""
     try:
         from .ml_utils import predict
         message.satisfaction = predict(message.message)
         message.save(update_fields=['satisfaction'])
-    except Exception:
-        pass
+    except Exception as error:
+        sentry_sdk.capture_exception(error)
 
 
 @api_view(['GET'])
